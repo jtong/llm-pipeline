@@ -1,0 +1,30 @@
+{
+  "name": "llm-pipeline",
+  "version": "1.0.0",
+  "description": "lightweight llm pipeline library",
+  "main": "index.js",
+  "bin": {
+  },
+  "scripts": {
+    "test": "node run-tests.js"
+  },
+  "author": "jtong",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "ejs": "^3.1.9",
+    "fs": "^0.0.1-security",
+    "handlebars": "^4.7.8",
+    "https-proxy-agent": "^7.0.2",
+    "java-parser": "^2.2.0",
+    "js-yaml": "^4.1.0",
+    "openai": "^4.24.7",
+    "pngjs": "^5.0.0",
+    "readdirp": "^3.6.0",
+    "xml2js": "^0.6.2",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "chai": "^4.4.1",
+    "mocha": "^10.2.0"
+  }
+}
