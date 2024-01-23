@@ -32,6 +32,23 @@ class OpenAIProcessor {
         }
     }
 
+    // 处理多条消息
+    async processMessages(messages) {
+        try {
+            const chatCompletion = await this.openai.chat.completions.create({
+                messages: messages, // 直接使用传入的消息数组
+                model: this.model,
+            });
+
+            // 提取并返回所有响应消息的内容
+            let responses = chatCompletion.choices.map(choice => choice.message.content.trim());
+            return responses;
+        } catch (error) {
+            console.error('An error occurred:', error);
+            throw error;
+        }
+    }
+
 }
 
 module.exports = OpenAIProcessor;

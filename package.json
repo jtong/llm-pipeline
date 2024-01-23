@@ -1,6 +1,6 @@
 {
   "name": "llm-pipeline",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "lightweight llm pipeline library",
   "main": "index.js",
   "bin": {
