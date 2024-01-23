@@ -41,8 +41,8 @@ class OpenAIProcessor {
             });
 
             // 提取并返回所有响应消息的内容
-            let responses = chatCompletion.choices.map(choice => choice.message.content.trim());
-            return responses;
+            let responses = chatCompletion.choices[0]?.message?.content;
+            return responses.trim();
         } catch (error) {
             console.error('An error occurred:', error);
             throw error;

@@ -1,0 +1,25 @@
+[
+  {
+    "id": "thread_4lrp6nghr",
+    "agent": "default",
+    "messages": []
+  },
+  {
+    "id": "thread_sdt5uqg71",
+    "messages": [
+      {
+        "sender": "user",
+        "text": "ssss",
+        "id": "msg_lcfpfw77r",
+        "formSubmitted": false
+      },
+      {
+        "id": "msg_aigwqt7m0",
+        "sender": "bot",
+        "text": "回复: ssss",
+        "isHtml": false,
+        "threadId": "thread_sdt5uqg71"
+      }
+    ]
+  }
+]
