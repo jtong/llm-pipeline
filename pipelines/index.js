@@ -19,6 +19,7 @@ class Pipe extends PipelineComponent {
     }
 }
 
+
 class Pipeline extends PipelineComponent {
     constructor() {
         super();
@@ -43,12 +44,14 @@ class Pipeline extends PipelineComponent {
     }
 }
 
+const empty_pipe = new Pipe(async(input) => input )
+
 class ConditionalPipe extends PipelineComponent {
     constructor(conditionFunc) {
         super();
-        this.conditionFunc = conditionFunc;
-        this.trueComponent = null;
-        this.falseComponent = null;
+        this.conditionFunc = conditionFunc; // 为什么要用function，而不用pipe，因为pipe有个职责是要维护input这个context持续向后传，而我们希望这个function不要有赋值动作，不要有这个义务，返回true/false
+        this.trueComponent = empty_pipe;
+        this.falseComponent = empty_pipe;
     }
 
     setTrueComponent(component) {

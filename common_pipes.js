@@ -34,7 +34,8 @@ module.exports = {
         // 这里是XML解析的逻辑
         // 截取<data>和</data>之间的内容（包含data标签）
         return await data_element_post_process(input);
-    })
+    }),
+    empty_pipe : new Pipe(async(input) => input )
 }
 
 
