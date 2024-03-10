@@ -13,7 +13,7 @@ class Pipe extends PipelineComponent {
 
     async run(input) {
         try {
-            return await this.func(input);
+            return await this.func(input, this.context);
         } catch (error) {
             throw error;
         }
