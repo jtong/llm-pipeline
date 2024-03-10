@@ -17,6 +17,19 @@ class Pipe extends PipelineComponent {
             throw error;
         }
     }
+
+    // 设置闭包变量
+    setContext(key, value) {
+        this.context[key] = value;
+        return this;
+    }
+
+    // 克隆 Pipe 对象,并清空闭包变量
+    clone() {
+        const clonedPipe = new Pipe(this.func);
+        clonedPipe.context = {}; // 确保克隆后的 Pipe 有一个全新的 context
+        return clonedPipe;
+    }
 }
 
 
