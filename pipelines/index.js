@@ -8,6 +8,7 @@ class Pipe extends PipelineComponent {
     constructor(func) {
         super();
         this.func = func;
+        this.context = {};
     }
 
     async run(input) {
