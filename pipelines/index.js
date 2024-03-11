@@ -132,9 +132,35 @@ class LoopPipe extends PipelineComponent {
     }
 }
 
+class RetryPipe extends PipelineComponent {
+    constructor(conditionFunc, retryComponent, maxRetries = 2) {
+        super();
+        this.conditionFunc = conditionFunc;
+        this.retryComponent = retryComponent;
+        this.maxRetries = maxRetries;
+    }
+
+    async run(input) {
+        let retries = 0;
+        let result;
+
+        do {
+            result = await this.retryComponent.run(input);
+            if (await this.conditionFunc(result)) {
+                retries++;
+            } else {
+                return result;
+            }
+        } while (retries < this.maxRetries);
+
+        throw new Error('Maximum retries exceeded');
+    }
+}
+
 module.exports = {
     Pipeline,
     Pipe,
     ConditionalPipe,
-    LoopPipe
+    LoopPipe,
+    RetryPipe
 };
