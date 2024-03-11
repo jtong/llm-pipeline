@@ -135,7 +135,7 @@ class LoopPipe extends PipelineComponent {
 class RetryPipe extends PipelineComponent {
     constructor(conditionFunc, retryComponent, maxRetries = 2) {
         super();
-        this.conditionFunc = conditionFunc;
+        this.passConditionFunc = conditionFunc;
         this.retryComponent = retryComponent;
         this.maxRetries = maxRetries;
     }
@@ -146,7 +146,7 @@ class RetryPipe extends PipelineComponent {
 
         do {
             result = await this.retryComponent.run(input);
-            if (await this.conditionFunc(result)) {
+            if (!await this.passConditionFunc(result)) {
                 retries++;
             } else {
                 return result;
