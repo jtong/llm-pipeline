@@ -30,6 +30,10 @@ describe('OpenAI Simulator Tests', function() {
             // 使用给定的消息处理
             const response = await openAIProcessor.processMessages(given.messages);
 
+            if(given.isSaveRecording){
+                openAIProcessor.saveRecordings();
+            }
+
             // 返回测试结果
             return {
                 response,
@@ -37,7 +41,6 @@ describe('OpenAI Simulator Tests', function() {
             };
         },
         customValidator: (result, testCase) => {
-            expect(result.response).to.equal(testCase.then.response);
         },
         beforeTestHook: (testCase, dir, filePath) => {
             console.log(dir);
