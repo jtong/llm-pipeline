@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 
-const OpenAIProcessorDecorator = require("./decorator")
 function readRecordings(recordPath) {
     const recordings = [];
     const files = fs.readdirSync(recordPath);
@@ -29,9 +28,9 @@ function getSimulatedResponse(recordings, messages) {
     return 'No matching recording found.';
 }
 
-class SimulatedOpenAIProcessorDecorator extends OpenAIProcessorDecorator {
+class SimulatedOpenAIProcessorDecorator {
     constructor(openAIProcessor, recordPath) {
-        super(openAIProcessor);
+        this.openAIProcessor = openAIProcessor;
         this.recordPath = recordPath;
         this.recordings = readRecordings(recordPath);
     }
@@ -41,7 +40,7 @@ class SimulatedOpenAIProcessorDecorator extends OpenAIProcessorDecorator {
             const response = getSimulatedResponse(this.recordings, prompt);
             return response.trim();
         } else {
-            return super.processPrompt(prompt);
+            return this.openAIProcessor.processPrompt(prompt);
         }
     }
 
@@ -55,7 +54,7 @@ class SimulatedOpenAIProcessorDecorator extends OpenAIProcessorDecorator {
             return simulatedResponse;
         }
 
-        const outputString = await super.processMessages(messages);
+        const outputString = await this.this.openAIProcessor.processMessages(messages);
 
         // 根据 useRecording 决定是否记录请求和响应
         if (useRecording) {

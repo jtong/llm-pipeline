@@ -24,19 +24,24 @@ describe('OpenAI Simulator Tests', function() {
             process.env.OPENAI_SIMULATE_ONLY = given.OPENAI_SIMULATE_ONLY; // 设置模拟器路径
             process.env.OPENAI_USE_RECORDING = given.OPENAI_USE_RECORDING; // 设置记录模式
 
-            let messages = [{ role: 'user', content: given.prompt }];
-
             const simulatorPath = process.env.OPENAI_SIMULATOR_PATH;
             const openAIProcessor = OpenAIProcessorInstance.getSimulatedOpenAIProcessor(process.env.OPENAI_API_KEY, 'gpt-3.5-turbo-16k', simulatorPath);
-            const response = await openAIProcessor.processMessages(messages);
 
+            // 使用给定的消息处理
+            const response = await openAIProcessor.processMessages(given.messages);
+
+            // 返回测试结果
             return {
                 response,
                 simulatorPath: given.simulatorPath // 将simulatorPath作为键值对返回
             };
         },
+        customValidator: (result, testCase) => {
+            expect(result.response).to.equal(testCase.then.response);
+        },
         beforeTestHook: (testCase, dir, filePath) => {
-            const simulatorPath = path.resolve(dir, testCase.given.simulatorPath);
+            console.log(dir);
+            const simulatorPath = path.resolve(__dirname, 'cases', testCase.given.simulatorPath);
             clearSimulatorFolder(simulatorPath);
         },
         afterTestHook: (result, testCase, dir, filePath) => {
