@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 const { runTests } = require('test/test-framework.js');
-const OpenAIProcessorFactory = require('../factory');
+const OpenAIProcessorInstance = require('../factory');
 const fs = require("fs");
 const path = require("path");
 const casesDirectory = "openai_client/test/cases";
@@ -32,8 +32,9 @@ describe('OpenAI Simulator Tests', function() {
                 fs.writeFileSync(path.join(simulatorPath, 'recording_1.json'), JSON.stringify(recording));
             }
 
-            const openAIProcessor = OpenAIProcessorFactory.createProcessor(process.env.OPENAI_API_KEY, 'gpt-3.5-turbo-16k');
-            // 运行测试
+            const openAIProcessor = simulatorPath
+                ? OpenAIProcessorInstance.getSimulatedOpenAIProcessor(process.env.OPENAI_API_KEY, 'gpt-3.5-turbo-16k', simulatorPath)
+                : OpenAIProcessorInstance.getOpenAIProcessor(process.env.OPENAI_API_KEY, 'gpt-3.5-turbo-16k');            // 运行测试
             const response = await openAIProcessor.processMessages(messages);
             return response;
         },
