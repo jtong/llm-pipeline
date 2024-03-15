@@ -1,0 +1,8 @@
+desc: "测试模拟器响应"
+given:
+  prompt: "这是测试提示"
+  simulatorPath: "case1/simulator"
+  OPENAI_SIMULATE_ONLY: "true"
+  OPENAI_USE_RECORDING: "false"
+then:
+  response: "这是预期响应"

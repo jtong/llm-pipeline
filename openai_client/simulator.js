@@ -48,6 +48,7 @@ class SimulatedOpenAIProcessorDecorator extends OpenAIProcessorDecorator {
     async processMessages(messages) {
         const inputString = JSON.stringify(messages);
         const simulateOnly = process.env.OPENAI_SIMULATE_ONLY === 'true';
+        const useRecording = process.env.OPENAI_USE_RECORDING === 'true';
 
         if (simulateOnly) {
             const simulatedResponse = getSimulatedResponse(this.recordings, messages);
@@ -56,8 +57,10 @@ class SimulatedOpenAIProcessorDecorator extends OpenAIProcessorDecorator {
 
         const outputString = await super.processMessages(messages);
 
-        // 记录输入和输出
-        this.recordings.push({ input: inputString, output: outputString });
+        // 根据 useRecording 决定是否记录请求和响应
+        if (useRecording) {
+            this.recordings.push({ input: inputString, output: outputString });
+        }
 
         return outputString;
     }

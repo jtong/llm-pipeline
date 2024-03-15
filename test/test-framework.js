@@ -5,14 +5,31 @@ const { describe, it } = require('mocha');
 const yaml = require('js-yaml');
 
 const workspaceRoot = path.resolve(__dirname, "../");
+function getTestCases(dir) {
+    const testCases = [];
+    const files = fs.readdirSync(dir);
 
+    for (const file of files) {
+        const filePath = path.join(dir, file);
+        const stats = fs.statSync(filePath);
+
+        if (stats.isDirectory()) {
+            testCases.push(...getTestCases(filePath));
+        } else if (file.endsWith('.yaml')) {
+            testCases.push({ filePath, dir });
+        }
+    }
+
+    return testCases;
+}
 exports.runTests = function(config) {
-    const testcaseDirectory = config.isDebugMode ? path.resolve(config.casesDirectory, 'debug') : config.casesDirectory;
-    const testFiles = fs.readdirSync(path.resolve(workspaceRoot, testcaseDirectory)).filter(file => file.endsWith('.yaml'));
+    const testcaseDirectory = config.isDebugMode ? path.resolve(workspaceRoot, config.casesDirectory, 'debug') : path.resolve(config.casesDirectory);
+    const testCases = getTestCases(testcaseDirectory);
+
+    // const testFiles = fs.readdirSync(path.resolve(workspaceRoot, testcaseDirectory)).filter(file => file.endsWith('.yaml'));
 
     describe('Data Driven Tests', function () {
-        testFiles.forEach(file => {
-            const filePath = path.resolve(workspaceRoot, testcaseDirectory, file);
+        testCases.forEach(({filePath,dir}) => {
             const testCase = yaml.load(fs.readFileSync(filePath, 'utf8'));
 
             it(testCase.desc, async function () {

@@ -1,7 +1,0 @@
-desc: "测试模拟器响应"
-given:
-  prompt: "这是测试提示"
-  recording:
-    output: "这是预期响应"
-then:
-  expectedResponse: "这是预期响应"

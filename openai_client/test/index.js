@@ -5,42 +5,29 @@ const fs = require("fs");
 const path = require("path");
 const casesDirectory = "openai_client/test/cases";
 
+
 describe('OpenAI Simulator Tests', function() {
     const config = {
         casesDirectory,
         testFunction: async (given) => {
-            process.env.OPENAI_SIMULATOR_PATH = path.resolve(__dirname, 'cases/simulator'); // 设置模拟器路径
-            process.env.OPENAI_SIMULATE_ONLY = "true"; // 设置模拟器路径
-            // 清理模拟器录制文件
-
-            const simulatorPath = process.env.OPENAI_SIMULATOR_PATH;
-            const simulatorFiles = fs.readdirSync(simulatorPath);
-            simulatorFiles.forEach(file => {
-                if (file.startsWith('recording_')) {
-                    fs.unlinkSync(path.join(simulatorPath, file));
-                }
-            });
+            process.env.OPENAI_SIMULATOR_PATH = path.resolve(__dirname, 'cases', given.simulatorPath); // 设置模拟器路径
+            process.env.OPENAI_SIMULATE_ONLY = given.OPENAI_SIMULATE_ONLY; // 设置模拟器路径
+            process.env.OPENAI_USE_RECORDING = given.OPENAI_USE_RECORDING; // 设置记录模式
 
             let messages = [{ role: 'user', content: given.prompt }];
 
-            // 添加期望的响应到模拟器 (如果指定了)
-            if (given.recording) {
-                const recording = {
-                    input: JSON.stringify(messages),
-                    output: given.recording.output
-                };
-                fs.writeFileSync(path.join(simulatorPath, 'recording_1.json'), JSON.stringify(recording));
-            }
-
-            const openAIProcessor = simulatorPath
-                ? OpenAIProcessorInstance.getSimulatedOpenAIProcessor(process.env.OPENAI_API_KEY, 'gpt-3.5-turbo-16k', simulatorPath)
-                : OpenAIProcessorInstance.getOpenAIProcessor(process.env.OPENAI_API_KEY, 'gpt-3.5-turbo-16k');            // 运行测试
+            const simulatorPath = process.env.OPENAI_SIMULATOR_PATH;
+            const openAIProcessor = OpenAIProcessorInstance.getSimulatedOpenAIProcessor(process.env.OPENAI_API_KEY, 'gpt-3.5-turbo-16k', simulatorPath);
             const response = await openAIProcessor.processMessages(messages);
-            return response;
+
+            return {
+                response,
+                simulatorPath: given.simulatorPath // 将simulatorPath作为键值对返回
+            };
         },
         isDebugMode: process.env.DEBUG_MODE === 'true',
         customValidator: (result, testCase) => {
-            expect(result).to.equal(testCase.then.expectedResponse);
+            expect(result.response).to.equal(testCase.then.response);
         }
     };
 
