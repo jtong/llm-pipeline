@@ -5,6 +5,16 @@ const fs = require("fs");
 const path = require("path");
 const casesDirectory = "openai_client/test/cases";
 
+const clearSimulatorFolder = (simulatorPath) => {
+    if (fs.existsSync(simulatorPath)) {
+        const files = fs.readdirSync(simulatorPath);
+        for (const file of files) {
+            fs.unlinkSync(path.join(simulatorPath, file));
+        }
+    }
+}
+
+
 
 describe('OpenAI Simulator Tests', function() {
     const config = {
@@ -25,10 +35,14 @@ describe('OpenAI Simulator Tests', function() {
                 simulatorPath: given.simulatorPath // 将simulatorPath作为键值对返回
             };
         },
-        isDebugMode: process.env.DEBUG_MODE === 'true',
-        customValidator: (result, testCase) => {
-            expect(result.response).to.equal(testCase.then.response);
-        }
+        beforeTestHook: (testCase, dir, filePath) => {
+            const simulatorPath = path.resolve(dir, testCase.given.simulatorPath);
+            clearSimulatorFolder(simulatorPath);
+        },
+        afterTestHook: (result, testCase, dir, filePath) => {
+            // 在这里执行任何需要的后置逻辑
+        },
+        isDebugMode: process.env.DEBUG_MODE === 'true'
     };
 
     runTests(config);

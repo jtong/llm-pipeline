@@ -34,7 +34,18 @@ exports.runTests = function(config) {
 
             it(testCase.desc, async function () {
                 this.timeout(10000);
+
+                // 执行前置钩子
+                if (config.beforeCaseHook && testCase.given.executeBeforeCaseHook) {
+                    await config.beforeCaseHook(testCase, dir, filePath);
+                }
+
                 const result = await config.testFunction(testCase.given);
+
+                // 执行后置钩子
+                if (config.afterCaseHook && testCase.given.executeAfterCaseHook) {
+                    await config.afterCaseHook(result, testCase, dir, filePath);
+                }
 
                 // 如果提供了自定义验证函数，则使用它进行验证
                 if (config.customValidator) {
