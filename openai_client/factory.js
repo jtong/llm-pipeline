@@ -15,7 +15,8 @@ class OpenAIProcessorInstance {
         return this.openAIProcessors[key];
     }
 
-    getSimulatedOpenAIProcessor(apiKey, model, simulatorPath) {
+    getSimulatedOpenAIProcessor(apiKey, model) {
+        const simulatorPath = process.env.OPENAI_SIMULATOR_PATH;
         const key = `${apiKey}-${model}-${simulatorPath}`;
         if (!this.simulatedOpenAIProcessors[key]) {
             const openAIProcessor = this.getOpenAIProcessor(apiKey, model);

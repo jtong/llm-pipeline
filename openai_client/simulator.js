@@ -47,21 +47,25 @@ class SimulatedOpenAIProcessorDecorator {
     async processMessages(messages) {
         const inputString = JSON.stringify(messages);
         const simulateOnly = process.env.OPENAI_SIMULATE_ONLY === 'true';
-        const useRecording = process.env.OPENAI_USE_RECORDING === 'true';
+        const isRecording = process.env.IS_RECORDING_OPENAI === 'true';
 
         if (simulateOnly) {
             const simulatedResponse = getSimulatedResponse(this.recordings, messages);
             return simulatedResponse;
         }
 
-        const outputString = await this.this.openAIProcessor.processMessages(messages);
+        const outputString = await this.openAIProcessor.processMessages(messages);
 
-        // 根据 useRecording 决定是否记录请求和响应
-        if (useRecording) {
+        // 根据 isRecording 决定是否记录请求和响应
+        if (isRecording) {
             this.recordings.push({ input: inputString, output: outputString });
         }
 
         return outputString;
+    }
+
+    clearRecordings() {
+        this.recordings = []; // 重置录制列表，清空内存中的记录
     }
 
     saveRecordings() {
