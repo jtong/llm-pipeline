@@ -5,15 +5,16 @@ const path = require("path");
 const casesDirectory = "openai_client/test/cases";
 
 
-function clearDirectory(directoryPath) {
+function clearDirectory(directoryPath, excludedFiles = []) {
     if (fs.existsSync(directoryPath)) {
         const files = fs.readdirSync(directoryPath);
         for (const file of files) {
-            fs.unlinkSync(path.join(directoryPath, file));
+            if (!excludedFiles.includes(file)) {
+                fs.unlinkSync(path.join(directoryPath, file));
+            }
         }
     }
 }
-
 describe('OpenAI Simulated Response Test', function() {
     it('should return the simulated response from the specified json recording when simulation is enabled', async function() {
         // 模拟环境变量设置
@@ -32,7 +33,6 @@ describe('OpenAI Simulated Response Test', function() {
         // 创建模拟的 OpenAI 处理器实例
         const openAIProcessor = OpenAIProcessorInstance.getSimulatedOpenAIProcessor(simulatedAPIKey, simulatedModel);
         // 模拟消息处理
-        // 输入应与 recording_1.json 中的输入相匹配
         expect(await openAIProcessor.processPrompt([{role: "user", content: "这是测试提示"}]))
             .to.equal('这是预期响应');
 
@@ -130,6 +130,66 @@ describe('OpenAI Response Recording Test', function() {
             const recordingData = JSON.parse(fs.readFileSync(path.join(simulatorPath, file), 'utf8'));
             expect(recordingData.input).to.be.oneOf([JSON.stringify(messagesRound1), JSON.stringify(messagesRound2)]);
             expect(recordingData.output).to.be.oneOf([responseRound1, responseRound2]);
+        });
+    });
+});
+
+describe('OpenAI Response Recording Test with simulateOnly = false', function() {
+    const simulatorPath = path.join(__dirname, 'cases/case3/simulator');
+
+    beforeEach(function() {
+        // 确保模拟器路径存在
+        if (!fs.existsSync(simulatorPath)) {
+            fs.mkdirSync(simulatorPath, { recursive: true });
+        }
+        // 清除模拟器路径中的记录文件,但保留recording_0.json
+        clearDirectory(simulatorPath, ['recording_0.json']);
+    });
+
+
+    it('should record new OpenAI responses and not duplicate existing ones when simulateOnly is false', async function() {
+        // 模拟环境变量设置
+        this.timeout(10000);
+
+        const simulatedAPIKey = process.env.OPENAI_API_KEY;
+        const simulatedModel = 'gpt-3.5-turbo';
+        const simulateOnly = "true";
+        const isRecording = "true";
+
+        // 设置环境变量
+        process.env.OPENAI_SIMULATE_ONLY = simulateOnly;
+        process.env.IS_RECORDING_OPENAI = isRecording;
+        process.env.OPENAI_SIMULATOR_PATH = simulatorPath;
+
+        // 创建模拟的 OpenAI 处理器实例
+        const openAIProcessor = OpenAIProcessorInstance.getSimulatedOpenAIProcessor(simulatedAPIKey, simulatedModel);
+
+        // 模拟消息处理
+        const existingMessages = [{ role: "user", content: "这是一个已存在的测试提示" }];
+        const newMessages = [{ role: "user", content: "这是一个新的测试提示" }];
+
+        // 处理已存在的消息
+        const existingResponse = await openAIProcessor.processMessages(existingMessages);
+        // 处理新的消息
+        const newResponse = await openAIProcessor.processMessages(newMessages);
+
+        // 存储录制
+        openAIProcessor.saveRecordings();
+
+        // 验证是否只有一个记录文件被创建
+        const recordedFiles = fs.readdirSync(simulatorPath);
+        expect(recordedFiles).to.have.lengthOf(2);
+
+        // 验证记录文件内容
+        recordedFiles.forEach(file => {
+            const recordingData = JSON.parse(fs.readFileSync(path.join(simulatorPath, file), 'utf8'));
+            if (file === 'recording_0.json') {
+                expect(recordingData.input).to.equal(JSON.stringify(existingMessages));
+                expect(existingResponse).to.equal("这是一个已存在的测试响应");
+            } else {
+                expect(recordingData.input).to.equal(JSON.stringify(newMessages));
+                expect(recordingData.output).to.equal(newResponse);
+            }
         });
     });
 });

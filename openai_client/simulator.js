@@ -48,20 +48,25 @@ class SimulatedOpenAIProcessorDecorator {
         const inputString = JSON.stringify(messages);
         const simulateOnly = process.env.OPENAI_SIMULATE_ONLY === 'true';
         const isRecording = process.env.IS_RECORDING_OPENAI === 'true';
+        let response;
 
-        if (simulateOnly) {
-            const simulatedResponse = getSimulatedResponse(this.recordings, messages);
-            return simulatedResponse;
+        // 如果配置了记录，记录下请求和响应
+        const existingRecording = this.recordings.find(recording => recording.input === inputString);
+
+        if (simulateOnly && existingRecording) {
+            // 如果已经有匹配的录制数据,则返回录制数据的输出
+            return existingRecording.output;
+        } else {
+            // 如果没有匹配的录制数据,则访问 OpenAI 并获取响应
+            const outputString = await this.openAIProcessor.processMessages(messages);
+
+            // 根据 isRecording 决定是否记录请求和响应
+            if (isRecording) {
+                this.recordings.push({input: inputString, output: outputString});
+            }
+
+            return outputString;
         }
-
-        const outputString = await this.openAIProcessor.processMessages(messages);
-
-        // 根据 isRecording 决定是否记录请求和响应
-        if (isRecording) {
-            this.recordings.push({ input: inputString, output: outputString });
-        }
-
-        return outputString;
     }
 
     clearRecordings() {
@@ -75,7 +80,7 @@ class SimulatedOpenAIProcessorDecorator {
         }
 
         if (!fs.existsSync(this.recordPath)) {
-            fs.mkdirSync(this.recordPath, { recursive: true });
+            fs.mkdirSync(this.recordPath, {recursive: true});
         }
 
         this.recordings.forEach((recording, index) => {
